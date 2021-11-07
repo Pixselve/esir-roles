@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start:dev": "ts-node ./src/index.ts"
+    "start:dev": "ts-node ./src/index.ts",
+    "start:prod": "node dist/index.js",
+    "build": "tsc"
   },
   "dependencies": {
     "discord.js": "^13.3.1",
