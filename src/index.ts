@@ -15,10 +15,7 @@ client.once("ready", () => {
   console.log("Ready!");
 });
 
-client.on("messageCreate", async (message) => {
-  if (message.author.bot) return;
-  if (message.author.id !== "386264104232419330") return;
-  const member = message.author;
+client.on("guildMemberAdd", async (member) => {
   const dmChannel = await member.createDM();
   const schoolMessage = new MessageActionRow()
     .addComponents(new MessageSelectMenu().setCustomId("school-select").setPlaceholder("Choisissez votre école").addOptions([
