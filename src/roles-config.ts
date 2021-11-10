@@ -384,7 +384,7 @@ const rolesConfig: Map<string, RoleMessage> = new Map<string, RoleMessage>([
   [
     "bde-ping",
     {
-      roles: [roleConfig.esir3.snr],
+      roles: [roleConfig.bde.ping],
       text: "☑️ Vous receverez maintenant une notification à chaque annonce du BDE.",
       choices: [],
     },
