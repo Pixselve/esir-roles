@@ -55,31 +55,9 @@ const roleConfig = {
 
 
 const rolesConfig: Map<string, RoleMessage> = new Map<string, RoleMessage>([
-  ["1", {
-    roles: [],
-    text: "Tu viens d'où ?",
-    choices: [
-      {
-        title: "ESIR",
-        nextID: "esir"
-      },
-      {
-        title: "ISTIC",
-        nextID: "istic"
-      },
-      {
-        title: "IDESIR",
-        nextID: "idesir"
-      },
-      {
-        title: "Je suis un pote de pote d'une connaissance",
-        nextID: "friend"
-      },
-    ]
-  }],
   ["esir", {
     roles: [roleConfig.esir.main],
-    text: "Quelle promotion ?",
+    text: "Super ! Quelle promotion ?",
     choices: [
       {
         title: "CUPGE1",

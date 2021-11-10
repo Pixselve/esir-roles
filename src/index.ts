@@ -27,10 +27,18 @@ client.on("guildMemberAdd", async (member) => {
         label: 'ISTIC',
         value: 'istic',
       },
+      {
+        label: 'IDESIR',
+        value: 'idesir',
+      },
+      {
+        label: 'Je suis un pote de pote d\'une connaissance',
+        value: 'friend',
+      },
     ]));
   await dmChannel.send({
     components: [schoolMessage],
-    content: "Tu viens d'où ?",
+    content: "Bienvenue sur le serveur de l'ESIR ! Afin de pouvoir te donner accès aux salons de te promotion, je vais besoin d'en apprendre un peu plus sur toi. Pour commencer. D'où viens-tu ?",
   });
 });
 
