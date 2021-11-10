@@ -48,26 +48,65 @@ async function addRoleToUser(userID: string, roles: string[]) {
   await user.roles.add(roles);
 }
 
-client.on("interactionCreate", async (interaction) => {
-  if (interaction.isSelectMenu()) {
-    if (!rolesConfig.has(interaction.values[0])) return;
-    const roleConfig = rolesConfig.get(interaction.values[0]);
-    if (roleConfig === undefined) return;
-    //  Add the roles to the user
-    await addRoleToUser(interaction.user.id, roleConfig.roles);
-    //  Send a message to the user
-    if (roleConfig.choices.length > 0) {
-      const message = new MessageActionRow();
-      message.addComponents(new MessageSelectMenu().setCustomId(roleConfig.text).addOptions(roleConfig.choices.map(choice => ({
-        label: choice.title,
-        value: choice.nextID
-      }))).setMinValues(1).setMaxValues(1).setPlaceholder("Faites votre choix"));
-      await interaction.reply({ components: [message], content: roleConfig.text });
-    } else {
-      await interaction.reply({ content: roleConfig.text });
-    }
 
+client.on("messageCreate", async (message) => {
+  const member = message.author;
+  if (member.bot) return;
+  const dmChannel = await member.createDM();
+  const schoolMessage = new MessageActionRow()
+    .addComponents(new MessageSelectMenu().setCustomId("school-select").setPlaceholder("Choisissez votre école").addOptions([
+      {
+        label: 'ESIR',
+        value: 'esir',
+      },
+      {
+        label: 'ISTIC',
+        value: 'istic',
+      },
+      {
+        label: 'IDESIR',
+        value: 'idesir',
+      },
+      {
+        label: 'Je suis un pote de pote d\'une connaissance',
+        value: 'friend',
+      },
+    ]));
+  await dmChannel.send({
+    components: [schoolMessage],
+    content: "Bienvenue sur le serveur de l'ESIR ! Afin de pouvoir te donner accès aux salons de te promotion, je vais besoin d'en apprendre un peu plus sur toi. Pour commencer. D'où viens-tu ?",
+  });
+});
+
+
+client.on("interactionCreate", async (interaction) => {
+  let interactionID;
+  if (interaction.isSelectMenu()) {
+    interactionID = interaction.values[0]
+  } else if (interaction.isButton()) {
+    interactionID = interaction.customId;
+  } else {
     return;
+  }
+
+  if (!rolesConfig.has(interactionID)) return;
+  const roleConfig = rolesConfig.get(interactionID);
+  if (roleConfig === undefined) return;
+  //  Add the roles to the user
+  await addRoleToUser(interaction.user.id, roleConfig.roles);
+  //  Send a message to the user
+
+  if (roleConfig.action !== undefined) roleConfig.action(interaction);
+
+  if (roleConfig.choices.length > 0) {
+    const message = new MessageActionRow();
+    message.addComponents(new MessageSelectMenu().setCustomId(roleConfig.text).addOptions(roleConfig.choices.map(choice => ({
+      label: choice.title,
+      value: choice.nextID
+    }))).setMinValues(1).setMaxValues(1).setPlaceholder("Faites votre choix"));
+    await interaction.reply({ components: [message], content: roleConfig.text });
+  } else {
+    await interaction.reply({ content: roleConfig.text });
   }
 });
 
