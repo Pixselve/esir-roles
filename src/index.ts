@@ -49,36 +49,6 @@ async function addRoleToUser(userID: string, roles: string[]) {
 }
 
 
-client.on("messageCreate", async (message) => {
-  const member = message.author;
-  if (member.bot) return;
-  const dmChannel = await member.createDM();
-  const schoolMessage = new MessageActionRow()
-    .addComponents(new MessageSelectMenu().setCustomId("school-select").setPlaceholder("Choisissez votre école").addOptions([
-      {
-        label: 'ESIR',
-        value: 'esir',
-      },
-      {
-        label: 'ISTIC',
-        value: 'istic',
-      },
-      {
-        label: 'IDESIR',
-        value: 'idesir',
-      },
-      {
-        label: 'Je suis un pote de pote d\'une connaissance',
-        value: 'friend',
-      },
-    ]));
-  await dmChannel.send({
-    components: [schoolMessage],
-    content: "Bienvenue sur le serveur de l'ESIR ! Afin de pouvoir te donner accès aux salons de te promotion, je vais besoin d'en apprendre un peu plus sur toi. Pour commencer. D'où viens-tu ?",
-  });
-});
-
-
 client.on("interactionCreate", async (interaction) => {
   let interactionID;
   if (interaction.isSelectMenu()) {
