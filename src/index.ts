@@ -49,34 +49,68 @@ async function addRoleToUser(userID: string, roles: string[]) {
 }
 
 
-client.on("interactionCreate", async (interaction) => {
-  let interactionID;
-  if (interaction.isSelectMenu()) {
-    interactionID = interaction.values[0];
-  } else if (interaction.isButton()) {
-    interactionID = interaction.customId;
-  } else {
+client.on("messageCreate", async message => {
+  if (message.author.bot) return;
+  if (message.member.roles.cache.has(process.env.ROLE_MUTED ?? "")) {
+    await message.delete();
     return;
   }
 
-  if (!rolesConfig.has(interactionID)) return;
-  const roleConfig = rolesConfig.get(interactionID);
-  if (roleConfig === undefined) return;
-  //  Add the roles to the user
-  await addRoleToUser(interaction.user.id, roleConfig.roles);
-  //  Send a message to the user
+});
 
-  if (roleConfig.action !== undefined) roleConfig.action(interaction);
+client.on("interactionCreate", async (interaction) => {
+  if (interaction.isCommand()) {
+    switch (interaction.commandName) {
+      case "mute":
+        const user = interaction.options.getUser("utilisateur");
+        const reason = interaction.options.getString("raison");
+        const guildMember = await interaction.guild.members.fetch(user)
+        if (guildMember.roles.cache.has(process.env.ROLE_MUTED ?? "")) {
+          await interaction.reply({
+            content: "❌ Cet utilisateur est déjà muet.",
+            ephemeral: true
+          });
+          return;
+        }
+        await guildMember.roles.add(process.env.ROLE_MUTED ?? "", reason);
 
-  if (roleConfig.choices.length > 0) {
-    const message = new MessageActionRow();
-    message.addComponents(new MessageSelectMenu().setCustomId(roleConfig.text).addOptions(roleConfig.choices.map(choice => ({
-      label: choice.title,
-      value: choice.nextID
-    }))).setMinValues(1).setMaxValues(1).setPlaceholder("Faites votre choix"));
-    await interaction.reply({ components: [message], content: roleConfig.text });
+        await user.send("⚠️ Vous avez été rendu muet par un administrateur du serveur." + (reason.length > 0 ? ` Raison : ${reason}` : ""));
+
+        await interaction.reply({
+          content: "☑️ Utilisateur rendu muet.",
+          ephemeral: true,
+        });
+        break;
+    }
   } else {
-    await interaction.reply({ content: roleConfig.text });
+    let interactionID;
+    if (interaction.isSelectMenu()) {
+      interactionID = interaction.values[0];
+    } else if (interaction.isButton()) {
+      interactionID = interaction.customId;
+    } else {
+      return;
+    }
+
+    if (!rolesConfig.has(interactionID)) return;
+    const roleConfig = rolesConfig.get(interactionID);
+    if (roleConfig === undefined) return;
+    //  Add the roles to the user
+    await addRoleToUser(interaction.user.id, roleConfig.roles);
+    //  Send a message to the user
+
+    if (roleConfig.action !== undefined) roleConfig.action(interaction);
+
+    if (roleConfig.choices.length > 0) {
+      const message = new MessageActionRow();
+      message.addComponents(new MessageSelectMenu().setCustomId(roleConfig.text).addOptions(roleConfig.choices.map(choice => ({
+        label: choice.title,
+        value: choice.nextID
+      }))).setMinValues(1).setMaxValues(1).setPlaceholder("Faites votre choix"));
+      await interaction.reply({ components: [message], content: roleConfig.text });
+    } else {
+      await interaction.reply({ content: roleConfig.text });
+    }
   }
 });
 
