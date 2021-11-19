@@ -2,12 +2,13 @@ import { config } from "dotenv";
 // Require the necessary discord.js classes
 import { Client, Intents, MessageActionRow, MessageSelectMenu } from "discord.js";
 import rolesConfig from "./roles-config";
+import randomAnimalEmoji from "./randomAnimal";
 
 config();
 
 // Create a new client instance
 const client = new Client({
-  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS],
+  intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_VOICE_STATES],
 });
 
 // When the client is ready, run this code (only once)
@@ -58,13 +59,39 @@ client.on("messageCreate", async message => {
 
 });
 
+let createdChannelsIDs: Set<string> = new Set();
+
+client.on("voiceStateUpdate", async (oldState, newState) => {
+  const channelID = newState.channelId;
+
+  if (channelID === process.env.CHANNEL_VOICE_HOME) {
+    const voiceChannel = await newState.guild.channels.create(randomAnimalEmoji(), {
+      type: "GUILD_VOICE",
+      parent: process.env.CATEGORY_VOICE,
+      reason: `temporary channel created by ${ newState.member.user.username }`,
+      permissionOverwrites: [
+        {
+          id: newState.member.user.id,
+          allow: ["VIEW_CHANNEL", "MANAGE_CHANNELS", "MANAGE_ROLES"],
+
+        },
+      ],
+    });
+    createdChannelsIDs.add(voiceChannel.id);
+    await newState.setChannel(voiceChannel);
+  }
+  if (createdChannelsIDs.has(oldState.channelId) && oldState.channel.members.size === 0) {
+    await oldState.channel.delete("The temporary channel is empty");
+  }
+});
+
 client.on("interactionCreate", async (interaction) => {
   if (interaction.isCommand()) {
     switch (interaction.commandName) {
       case "mute":
         const user = interaction.options.getUser("utilisateur");
         const reason = interaction.options.getString("raison");
-        const guildMember = await interaction.guild.members.fetch(user)
+        const guildMember = await interaction.guild.members.fetch(user);
         if (guildMember.roles.cache.has(process.env.ROLE_MUTED ?? "")) {
           await interaction.reply({
             content: "❌ Cet utilisateur est déjà muet.",
@@ -74,7 +101,7 @@ client.on("interactionCreate", async (interaction) => {
         }
         await guildMember.roles.add(process.env.ROLE_MUTED ?? "", reason);
 
-        await user.send("⚠️ Vous avez été rendu muet par un administrateur du serveur." + (reason.length > 0 ? ` Raison : ${reason}` : ""));
+        await user.send("⚠️ Vous avez été rendu muet par un administrateur du serveur." + (reason.length > 0 ? ` Raison : ${ reason }` : ""));
 
         await interaction.reply({
           content: "☑️ Utilisateur rendu muet.",
