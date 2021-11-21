@@ -2,8 +2,10 @@ name: build-container
 
 on:
   push:
-    branches:
-      - 'master'
+    paths:
+      - "src/**"
+      - "Dockerfile"
+      - "**.json"
 
 jobs:
   docker:
