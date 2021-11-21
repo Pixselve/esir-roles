@@ -3,6 +3,7 @@ import { config } from "dotenv";
 import { Client, Intents, MessageActionRow, MessageSelectMenu } from "discord.js";
 import rolesConfig from "./roles-config";
 import randomAnimalEmoji from "./randomAnimal";
+import mute, { MuteError } from "./mute";
 
 config();
 
@@ -86,28 +87,58 @@ client.on("voiceStateUpdate", async (oldState, newState) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
-  if (interaction.isCommand()) {
+
+  if (interaction.isContextMenu()) {
     switch (interaction.commandName) {
       case "mute":
-        const user = interaction.options.getUser("utilisateur");
-        const reason = interaction.options.getString("raison");
-        const guildMember = await interaction.guild.members.fetch(user);
-        if (guildMember.roles.cache.has(process.env.ROLE_MUTED ?? "")) {
+        try {
+          if (interaction.targetType !== "USER") return;
+          const userID = interaction.targetId;
+          await mute(userID, interaction, "Muted by context");
+
           await interaction.reply({
-            content: "❌ Cet utilisateur est déjà muet.",
-            ephemeral: true
+            content: "☑️ Utilisateur rendu muet.",
+            ephemeral: true,
           });
-          return;
+        } catch (e) {
+          if (e === MuteError.AlreadyMuted) {
+            await interaction.reply({
+              content: "❌ Utilisateur déjà muet.",
+              ephemeral: true,
+            });
+          }
+        } finally {
+          break;
         }
-        await guildMember.roles.add(process.env.ROLE_MUTED ?? "", reason);
 
-        await user.send("⚠️ Vous avez été rendu muet par un administrateur du serveur." + (reason.length > 0 ? ` Raison : ${ reason }` : ""));
 
-        await interaction.reply({
-          content: "☑️ Utilisateur rendu muet.",
-          ephemeral: true,
-        });
-        break;
+
+    }
+
+  } else if (interaction.isCommand()) {
+    switch (interaction.commandName) {
+      case "mute":
+        try {
+          const user = interaction.options.getUser("utilisateur");
+          const reason = interaction.options.getString("raison");
+
+          await mute(user, interaction, reason);
+
+          await interaction.reply({
+            content: "☑️ Utilisateur rendu muet.",
+            ephemeral: true,
+          });
+        } catch (e) {
+          console.log(e);
+          if (e === MuteError.AlreadyMuted) {
+            await interaction.reply({
+              content: "❌ Utilisateur déjà muet.",
+              ephemeral: true,
+            });
+          }
+        } finally {
+          break;
+        }
     }
   } else {
     let interactionID;
