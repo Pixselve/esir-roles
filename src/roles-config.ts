@@ -67,7 +67,10 @@ const roleConfig = {
   },
   bde: {
     ping: "888340754722861066"
-  }
+  },
+  curious: {
+    main: "916467592481349672",
+  },
 };
 
 const rolesConfig: Map<string, RoleMessage> = new Map<string, RoleMessage>([
@@ -121,6 +124,14 @@ const rolesConfig: Map<string, RoleMessage> = new Map<string, RoleMessage>([
     {
       roles: [roleConfig.friend.main],
       text: "Bienvenue à toi l'ami !",
+      choices: [],
+    },
+  ],
+  [
+    "curious",
+    {
+      roles: [roleConfig.curious.main],
+      text: "Bienvenue sur le serveur de l'ESIR. Ici, tu pourras obtenir des informations précieuses auprès des étudiants de toutes les promotions !",
       choices: [],
     },
   ],

@@ -37,6 +37,10 @@ client.on("guildMemberAdd", async (member) => {
         label: 'Je suis un pote de pote d\'une connaissance',
         value: 'friend',
       },
+      {
+        label: "Je suis intéressé par l'école et je souhaite en savoir plus",
+        value: 'curious',
+      },
     ]));
   await dmChannel.send({
     components: [schoolMessage],
