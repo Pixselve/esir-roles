@@ -22,19 +22,19 @@ client.on("guildMemberAdd", async (member) => {
   const schoolMessage = new MessageActionRow()
     .addComponents(new MessageSelectMenu().setCustomId("school-select").setPlaceholder("Choisissez votre école").addOptions([
       {
-        label: 'ESIR',
+        label: 'Je suis étudiant à l\'ESIR',
         value: 'esir',
       },
       {
-        label: 'ISTIC',
+        label: 'Je suis étudiant à l\'ISTIC',
         value: 'istic',
       },
       {
-        label: 'IDESIR',
+        label: 'Je suis un ancien de l\'ESIR',
         value: 'idesir',
       },
       {
-        label: 'Je suis un pote de pote d\'une connaissance',
+        label: 'Je suis un ami d\'un étudiant à l\'ESIR',
         value: 'friend',
       },
       {
